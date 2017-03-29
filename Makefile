@@ -28,6 +28,7 @@ export FLAGS		 = -std=gnu99 \
 			   -nostartfiles \
 			   -lnosys \
 			   -Wl,-gc-sections \
+			   -Wl,-g \
 			   -Werror
 
 export COMMON_SRCS	 = bl.c cdcacm.c  usart.c
@@ -36,6 +37,7 @@ export COMMON_SRCS	 = bl.c cdcacm.c  usart.c
 # Bootloaders to build
 #
 TARGETS	= \
+	aerofcv1_bl \
 	auavx2v1_bl \
 	crazyflie_bl \
 	mindpxv2_bl \
@@ -46,9 +48,10 @@ TARGETS	= \
 	px4fmuv2_bl \
 	px4fmuv4_bl \
 	px4fmuv4pro_bl \
+	px4fmuv5_bl \
 	px4io_bl \
 	px4iov3_bl \
-	tapv1_bl \
+	tapv1_bl
 
 all:	$(TARGETS)
 
@@ -75,6 +78,9 @@ px4fmuv4_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 
 px4fmuv4pro_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
 	make -f Makefile.f4 TARGET_HW=PX4_FMU_V4_PRO LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@ EXTRAFLAGS=-DSTM32F469
+
+px4fmuv5_bl:$(MAKEFILE_LIST) $(LIBOPENCM3)
+	make -f Makefile.f7 TARGET_HW=PX4_FMU_V5 LINKER_FILE=stm32f7.ld TARGET_FILE_NAME=$@
 
 mindpxv2_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 	make -f Makefile.f4 TARGET_HW=MINDPX_V2 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
@@ -104,6 +110,8 @@ px4iov3_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 tapv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
 	make -f Makefile.f4 TARGET_HW=TAP_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
 
+aerofcv1_bl: $(MAKEFILE_LIST) $(LIBOPENCM3)
+	make -f Makefile.f4 TARGET_HW=AEROFC_V1 LINKER_FILE=stm32f4.ld TARGET_FILE_NAME=$@
 
 #
 # Binary management

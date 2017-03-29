@@ -1,5 +1,5 @@
 /*
- * STM32F4 board support for the bootloader.
+ * STM32F7 board support for the bootloader.
  *
  */
 
@@ -40,43 +40,29 @@ static struct {
 	 * from the BOARD_FLASH_SIZE. See APP_SIZE_MAX below.
 	 */
 
-	{0x01, 16 * 1024},
-	{0x02, 16 * 1024},
-	{0x03, 16 * 1024},
-	{0x04, 64 * 1024},
-	{0x05, 128 * 1024},
-	{0x06, 128 * 1024},
-	{0x07, 128 * 1024},
-	{0x08, 128 * 1024},
-	{0x09, 128 * 1024},
-	{0x0a, 128 * 1024},
-	{0x0b, 128 * 1024},
-	/* flash sectors only in 2MiB devices */
-	{0x10, 16 * 1024},
-	{0x11, 16 * 1024},
-	{0x12, 16 * 1024},
-	{0x13, 16 * 1024},
-	{0x14, 64 * 1024},
-	{0x15, 128 * 1024},
-	{0x16, 128 * 1024},
-	{0x17, 128 * 1024},
-	{0x18, 128 * 1024},
-	{0x19, 128 * 1024},
-	{0x1a, 128 * 1024},
-	{0x1b, 128 * 1024},
+	{0x01, 32 * 1024},
+	{0x02, 32 * 1024},
+	{0x03, 32 * 1024},
+	{0x04, 128 * 1024},
+	{0x05, 256 * 1024},
+	{0x06, 256 * 1024},
+	{0x07, 256 * 1024},
+	{0x08, 256 * 1024},
+	{0x09, 256 * 1024},
+	{0x0a, 256 * 1024},
+	{0x0b, 256 * 1024},
 };
-#define BOOTLOADER_RESERVATION_SIZE	(16 * 1024)
+#define BOOTLOADER_RESERVATION_SIZE	(32 * 1024)
 
-#define OTP_BASE			0x1fff7800
-#define OTP_SIZE			512
-#define UDID_START		        0x1FFF7A10
+#define OTP_BASE			0x1ff0f000
+#define OTP_SIZE			1024
+#define UDID_START			0x1ff0f420
 
 // address of MCU IDCODE
 #define DBGMCU_IDCODE		0xE0042000
 #define STM32_UNKNOWN	0
-#define STM32F40x_41x	0x413
-#define STM32F42x_43x	0x419
-#define STM32F42x_446xx	0x421
+#define STM32F74x_75x	0x449
+#define STM32F76x_77x	0x451
 
 #define REVID_MASK	0xFFFF0000
 #define DEVID_MASK	0xFFF
@@ -84,11 +70,8 @@ static struct {
 /* magic numbers from reference manual */
 
 typedef enum mcu_rev_e {
-	MCU_REV_STM32F4_REV_A = 0x1000,
-	MCU_REV_STM32F4_REV_Z = 0x1001,
-	MCU_REV_STM32F4_REV_Y = 0x1003,
-	MCU_REV_STM32F4_REV_1 = 0x1007,
-	MCU_REV_STM32F4_REV_3 = 0x2001
+	MCU_REV_STM32F7_REV_A = 0x1000,
+	MCU_REV_STM32F7_REV_Z = 0x1001,
 } mcu_rev_e;
 
 typedef struct mcu_des_t {
@@ -101,10 +84,9 @@ typedef struct mcu_des_t {
 // Before a rev is known it is set to ?
 // There for new silicon will result in STM32F4..,?
 mcu_des_t mcu_descriptions[] = {
-	{ STM32_UNKNOWN,	"STM32F???",    '?'},
-	{ STM32F40x_41x, 	"STM32F40x",	'?'},
-	{ STM32F42x_43x, 	"STM32F42x",	'?'},
-	{ STM32F42x_446xx, 	"STM32F446XX",	'?'},
+	{ STM32_UNKNOWN,	"STM32F??????",		'?'},
+	{ STM32F74x_75x, 	"STM32F7[4|5]x",	'?'},
+	{ STM32F76x_77x, 	"STM32F7[6|7]x",	'?'},
 };
 
 typedef struct mcu_rev_t {
@@ -123,15 +105,9 @@ typedef struct mcu_rev_t {
  *
  */
 const mcu_rev_t silicon_revs[] = {
-	{MCU_REV_STM32F4_REV_3, '3'}, /* Revision 3 */
-
-	{MCU_REV_STM32F4_REV_A, 'A'}, /* Revision A */  // FIRST_BAD_SILICON_OFFSET (place good ones above this line and update the FIRST_BAD_SILICON_OFFSET accordingly)
-	{MCU_REV_STM32F4_REV_Z, 'Z'}, /* Revision Z */
-	{MCU_REV_STM32F4_REV_Y, 'Y'}, /* Revision Y */
-	{MCU_REV_STM32F4_REV_1, '1'}, /* Revision 1 */
+	{MCU_REV_STM32F7_REV_A, 'A'}, /* Revision A */
+	{MCU_REV_STM32F7_REV_Z, 'Z'}, /* Revision Z */
 };
-
-#define FIRST_BAD_SILICON_OFFSET 1
 
 #define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
 
@@ -158,22 +134,20 @@ static void board_init(void);
 #define POWER_DOWN_RTC_SIGNATURE    0xdeaddead // Written by app fw to not re-power on.
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
-/* standard clocking for all F4 boards */
+/* standard clocking for all F7 boards */
 static const struct rcc_clock_scale clock_setup = {
-	.pllm = OSC_FREQ,
-	.plln = 336,
+	.pllm = 8,
+	.plln = 216,
 	.pllp = 2,
-	.pllq = 7,
-#if defined(STM32F446) || defined(STM32F469)
+	.pllq = 9,
 	.pllr = 2,
-#endif
 	.hpre = RCC_CFGR_HPRE_DIV_NONE,
 	.ppre1 = RCC_CFGR_PPRE_DIV_4,
 	.ppre2 = RCC_CFGR_PPRE_DIV_2,
 	.power_save = 0,
 	.flash_config = FLASH_ACR_ICE | FLASH_ACR_DCE | FLASH_ACR_LATENCY_5WS,
-	.apb1_frequency = 42000000,
-	.apb2_frequency = 84000000,
+	.apb1_frequency = 54000000,
+	.apb2_frequency = 108000000,
 };
 
 static uint32_t
@@ -278,7 +252,7 @@ board_test_usart_receiving_break()
 	 * Half the bit rate = 4.34us
 	 * Set period to 4.34 microseconds (timer_period = timer_tick / timer_reset_frequency = 168MHz / (1/4.34us) = 729.12 ~= 729)
 	 */
-	systick_set_reload(((board_info.systick_mhz * 1000000) / USART_BAUDRATE) >> 1);
+	systick_set_reload(729);  /* 4.3us tick, magic number */
 	systick_counter_enable(); // Start the timer
 
 	uint8_t cnt_consecutive_low = 0;
@@ -331,13 +305,6 @@ board_init(void)
 {
 	/* fix up the max firmware size, we have to read memory to get this */
 	board_info.fw_size = APP_SIZE_MAX;
-#if defined(TARGET_HW_PX4_FMU_V2) || defined(TARGET_HW_PX4_FMU_V4)
-
-	if (check_silicon() && board_info.fw_size == (2 * 1024 * 1024) - BOOTLOADER_RESERVATION_SIZE) {
-		board_info.fw_size = (1024 * 1024) - BOOTLOADER_RESERVATION_SIZE;
-	}
-
-#endif
 
 #if defined(BOARD_POWER_PIN_OUT)
 	/* Configure the Power pins */
@@ -540,7 +507,34 @@ flash_func_erase_sector(unsigned sector)
 void
 flash_func_write_word(uint32_t address, uint32_t word)
 {
-	flash_program_word(address + APP_LOAD_ADDRESS, word);
+	address += APP_LOAD_ADDRESS;
+
+	/* Ensure that all flash operations are complete. */
+
+	flash_wait_for_last_operation();
+
+	/* Program the 32bits. */
+
+	FLASH_CR &= ~(FLASH_CR_PROGRAM_MASK << FLASH_CR_PROGRAM_SHIFT);
+	FLASH_CR |= FLASH_CR_PROGRAM_X32 << FLASH_CR_PROGRAM_SHIFT;
+
+	/* Enable writes to flash. */
+
+	FLASH_CR |= FLASH_CR_PG;
+
+	/* Program the word. */
+
+	MMIO32(address)   = word;
+
+	/* Use DSB to complete write etal above. So that wait is not skipped */
+
+	__asm__ volatile("DSB \n");
+
+	flash_wait_for_last_operation();
+
+	/* Disable writes to flash. */
+
+	FLASH_CR &= ~FLASH_CR_PG;
 }
 
 uint32_t
@@ -614,17 +608,6 @@ int get_mcu_desc(int max, uint8_t *revstr)
 
 int check_silicon(void)
 {
-#if defined(TARGET_HW_PX4_FMU_V2) || defined(TARGET_HW_PX4_FMU_V4)
-	uint32_t idcode = (*(uint32_t *)DBGMCU_IDCODE);
-	mcu_rev_e revid = (idcode & REVID_MASK) >> 16;
-
-	for (int i = FIRST_BAD_SILICON_OFFSET; i < arraySize(silicon_revs); i++) {
-		if (silicon_revs[i].revid == revid) {
-			return -1;
-		}
-	}
-
-#endif
 	return 0;
 }
 
@@ -781,11 +764,13 @@ main(void)
 #if defined(BOARD_USB_VBUS_SENSE_DISABLED)
 	try_boot = false;
 #else
+
 	if (gpio_get(GPIOA, GPIO9) != 0) {
 
 		/* don't try booting before we set up the bootloader */
 		try_boot = false;
 	}
+
 #endif
 #endif
 
