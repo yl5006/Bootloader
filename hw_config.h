@@ -750,6 +750,7 @@
 
 #if !defined(USBVENDORID)
 #  define USBVENDORID 0x0483
+#endif
 
 #if !defined(APP_RESERVATION_SIZE)
 #  define APP_RESERVATION_SIZE 0
