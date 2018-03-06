@@ -715,6 +715,19 @@ main(void)
 	 * Check the force-bootloader register; if we find the signature there, don't
 	 * try booting.
 	 */
+	gpio_mode_setup(GPIOE, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO14);
+	gpio_clear(GPIOE, GPIO14);
+	gpio_mode_setup(GPIOE, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO13);
+	gpio_clear(GPIOE, GPIO13);
+	gpio_mode_setup(GPIOE, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO11);
+	gpio_clear(GPIOE, GPIO11);
+	gpio_mode_setup(GPIOE, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO9);
+	gpio_clear(GPIOE, GPIO9);
+	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO13);
+	gpio_clear(GPIOD, GPIO13);
+	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO14);
+	gpio_clear(GPIOD, GPIO14);
+
 	if (board_get_rtc_signature() == BOOT_RTC_SIGNATURE) {
 
 		/*
@@ -804,6 +817,12 @@ main(void)
 	}
 
 #endif
+
+	if (gpio_get(GPIOA, GPIO9) == 0) {
+
+		/* if usb not connect booting r */
+		try_boot = true;
+	}
 
 	/* Try to boot the app if we think we should just go straight there */
 	if (try_boot) {
